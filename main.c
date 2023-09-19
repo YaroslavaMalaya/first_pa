@@ -13,7 +13,7 @@ struct LinkedList{
     struct Node* current;
 };
 
-void addCharElement(struct LinkedList* list, const char elements[1000])
+void addCharElement(struct LinkedList* list, const char elements[100])
 {
     int i = 0;
     while (elements[i] != '\n')
@@ -83,10 +83,30 @@ void loadTextFromFile(struct LinkedList* list, char* fileName)
     list->current = NULL;
 
     FILE* file = fopen(fileName, "r");
-    char block[1000];
+    char block[100];
+    int i = 0;
+
     while (fgets(block, sizeof(block), file) != NULL)
     {
-        addCharElement(list, block);
+        while (block[i] != NULL)
+        {
+            if (list->head == NULL)
+            {
+                list->head = (struct Node*)malloc(sizeof(struct Node));
+                list->head->value = block[i];
+                list->head->next = NULL;
+                list->current = list->head;
+            }
+            else
+            {
+                list->current->next = (struct Node*)malloc(sizeof(struct Node));
+                list->current->next->value = block[i];
+                list->current->next->next = NULL;
+                list->current = list->current->next;
+            }
+            i++;
+        }
+        i = 0;
     }
     fclose(file);
 }
@@ -107,7 +127,7 @@ int main()
     struct LinkedList myList;
     myList.head = NULL;
     myList.current = NULL;
-    char input[1000];
+    char input[100];
     char fileName[100];
 
     printf("All commands:\n1-enter new text.\n2-start the new line.\n3-saving the information to your file."
@@ -140,7 +160,7 @@ int main()
             case 4:
                 printf("Enter the file name for loading: ");
                 scanf("%s", fileName);
-                if (fileName[0] != 0)
+                if (fileName != NULL)
                 {
                     loadTextFromFile(&myList, fileName);
                     printf("Text has been loaded successfully.");
