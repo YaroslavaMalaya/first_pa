@@ -111,6 +111,58 @@ void loadTextFromFile(struct LinkedList* list, char* fileName)
     fclose(file);
 }
 
+void insertText(struct LinkedList* list, int lineIndex, int symbolIndex, char* text)
+{
+    if (lineIndex == 0 && symbolIndex == 0)
+    {
+        list->current = list->head;
+        addCharElement(list, text);
+    }
+    else
+    {
+        list->current = list->head;
+        struct Node* previous = NULL;
+        int currentLine = 0;
+        int currentSymbol = 0;
+
+        while (currentLine < lineIndex)
+        {
+            previous = list->current;
+            list->current = previous->next;
+            if (list->current == NULL)
+            {
+                printf("\nIncorrect line index.");
+                break;
+            }
+            if (list->current->value == '\n')
+            {
+                currentLine++;
+            }
+        }
+
+        while (currentSymbol < symbolIndex)
+        {
+            previous = list->current;
+            list->current = previous->next;
+            currentSymbol++;
+        }
+
+        struct Node* temp = NULL;
+        temp = list->current->next;
+        int i = 0;
+
+        while (text[i] != '\n')
+        {
+            list->current->next = (struct Node*)malloc(sizeof(struct Node));
+            list->current->next->value = text[i];
+            list->current->next->next = NULL;
+            list->current = list->current->next;
+            i++;
+        }
+        list->current->next = temp;
+    }
+}
+
 void printLinkedList(struct LinkedList* list)
 {
     struct Node* current = list->head;
@@ -129,6 +181,8 @@ int main()
     myList.current = NULL;
     char input[100];
     char fileName[100];
+    int lineIndex;
+    int symbolIndex;
 
     printf("All commands:\n1-enter new text.\n2-start the new line.\n3-saving the information to your file."
            "\n4-loading the information from your file.\n5-print the current text to console.\n6-insert the text by line and symbol index."
@@ -141,7 +195,7 @@ int main()
         {
             case 1:
                 getchar(); // delete the new line character left in the buffer after typing
-                printf("Enter text to append (please, no more than 1000 characters): ");
+                printf("Enter text to append (please, no more than 100 characters): ");
                 fgets(input, sizeof(input), stdin);
                 addCharElement(&myList, input);
                 // printf("%s", input);
@@ -176,7 +230,11 @@ int main()
                 break;
             case 6:
                 printf("Choose line and index: ");
-                printf("Enter text to insert: ");
+                scanf("%d %d", &lineIndex, &symbolIndex);
+                getchar();
+                printf("Enter text to insert (please, no more than 100 characters): ");
+                fgets(input, sizeof(input), stdin);
+                insertText(&myList, lineIndex, symbolIndex, input);
                 break;
             case 7:
                 printf("Enter text to search: ");
