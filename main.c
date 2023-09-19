@@ -2,8 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-struct Node
-{
+struct Node{
     char value;
     struct Node* next;
 };
@@ -13,8 +12,7 @@ struct LinkedList{
     struct Node* current;
 };
 
-void addCharElement(struct LinkedList* list, const char elements[100])
-{
+void addCharElement(struct LinkedList* list, const char elements[100]){
     int i = 0;
     while (elements[i] != '\n')
     {
@@ -111,8 +109,7 @@ void loadTextFromFile(struct LinkedList* list, char* fileName)
     fclose(file);
 }
 
-void insertText(struct LinkedList* list, int lineIndex, int symbolIndex, char* text)
-{
+void insertText(struct LinkedList* list, int lineIndex, int symbolIndex, char* text){
     if (lineIndex == 0 && symbolIndex == 0)
     {
         list->current = list->head;
@@ -144,6 +141,11 @@ void insertText(struct LinkedList* list, int lineIndex, int symbolIndex, char* t
         {
             previous = list->current;
             list->current = previous->next;
+            if (list->current == NULL)
+            {
+                printf("\nIncorrect symbol index.");
+                break;
+            }
             currentSymbol++;
         }
 
@@ -163,8 +165,45 @@ void insertText(struct LinkedList* list, int lineIndex, int symbolIndex, char* t
     }
 }
 
-void printLinkedList(struct LinkedList* list)
-{
+void searchInText(struct LinkedList* list, const char* text){
+    struct Node* current = list->head;
+    int lineIndex = 0;
+    int symbolIndex = 0;
+    int textIndex = 0;
+    int checkLength = 0;
+
+    while (current != NULL)
+    {
+        if (current->value == '\n')
+        {
+            lineIndex++;
+            symbolIndex = 0;
+            textIndex = 0;
+            checkLength = 0;
+        }
+        else if (current->value == text[textIndex])
+        {
+            textIndex++;
+            checkLength++;
+
+            if (text[textIndex] == '\n')
+            {
+                printf("line %d  symbol %d; ", lineIndex, symbolIndex - checkLength);
+                textIndex = 0;
+                checkLength = 0;
+            }
+        }
+        else
+        {
+            textIndex = 0;
+            checkLength = 0;
+        }
+        current = current->next;
+        symbolIndex++;
+    }
+}
+
+void printLinkedList(struct LinkedList* list){
     struct Node* current = list->head;
     while (current != NULL)
     {
@@ -183,12 +222,16 @@ int main()
     char fileName[100];
     int lineIndex;
     int symbolIndex;
+    char searchText[100];
 
-    printf("All commands:\n1-enter new text.\n2-start the new line.\n3-saving the information to your file."
-           "\n4-loading the information from your file.\n5-print the current text to console.\n6-insert the text by line and symbol index."
-           "\n7-search by word.");
     while (1)
     {
+        system ("clear");
+
+        printf("\nAll commands:\n1-enter new text.\n2-start the new line.\n3-saving the information to your file."
+               "\n4-loading the information from your file.\n5-print the current text to console.\n6-insert the text "
+               "by line and symbol index.\n7-search by word.");
+
         printf("\nChoose the command:\n");
         scanf("%d", &command);
         switch (command)
@@ -237,8 +280,11 @@ int main()
                 insertText(&myList, lineIndex, symbolIndex, input);
                 break;
             case 7:
+                getchar();
                 printf("Enter text to search: ");
+                fgets(searchText, sizeof(searchText), stdin);
                 printf("Text is present in this position: ");
+                searchInText(&myList, searchText);
                 break;
             default:
                 printf("The command is not implemented.");
