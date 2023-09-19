@@ -1,18 +1,118 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+
+struct Node
+{
+    char value;
+    struct Node* next;
+};
+
+struct LinkedList{
+    struct Node* head;
+    struct Node* current;
+};
+
+void addCharElement(struct LinkedList* list, const char elements[1000])
+{
+    int i = 0;
+    while (elements[i] != '\n')
+    {
+        if (list->head == NULL)
+        {
+            list->head = (struct Node*)malloc(sizeof(struct Node));
+            list->head->value = elements[i];
+            list->head->next = NULL;
+            list->current = list->head;
+        }
+        else
+        {
+            list->current->next = (struct Node*)malloc(sizeof(struct Node));
+            list->current->next->value = elements[i];
+            list->current->next->next = NULL;
+            list->current = list->current->next;
+        }
+        i++;
+    }
+//    list->current->next = (struct Node*)malloc(sizeof(struct Node));
+//    list->current->next->value = '\0';
+//    list->current->next->next = NULL;
+//    list->current = list->current->next;
+}
+
+void addNewLine(struct LinkedList* list){
+    if (list->head == NULL)
+    {
+        list->head = (struct Node*)malloc(sizeof(struct Node));
+        list->head->value = '\n';
+        list->head->next = NULL;
+        list->current = list->head;
+    }
+    else
+    {
+        list->current->next = (struct Node*)malloc(sizeof(struct Node));
+        list->current->next->value = '\n';
+        list->current->next->next = NULL;
+        list->current = list->current->next;
+    }
+}
+
+void saveTextToFile(struct LinkedList* list, char* fileName)
+{
+    FILE* file = fopen(fileName, "a");
+    struct Node* current = list->head;
+    while (current != NULL)
+    {
+        fputc(current->value, file);
+        current = current->next;
+    }
+    fclose(file);
+}
+
+void loadTextFromFile(struct LinkedList* list, char* fileName)
+{
+    // clear linked list (myList)
+    struct Node* current = list->head;
+    while (current != NULL)
+    {
+        struct Node* next = current->next;
+        free(current);
+        current = next;
+    }
+    list->head = NULL;
+    list->current = NULL;
+
+    FILE* file = fopen(fileName, "r");
+    char block[1000];
+    while (fgets(block, sizeof(block), file) != NULL)
+    {
+        addCharElement(list, block);
+    }
+    fclose(file);
+}
+
+void printLinkedList(struct LinkedList* list)
+{
+    struct Node* current = list->head;
+    while (current != NULL)
+    {
+        printf("%c", current->value);
+        current = current->next;
+    }
+}
 
 int main()
 {
     int command;
-    char text[100];
-    char text2[100];
+    struct LinkedList myList;
+    myList.head = NULL;
+    myList.current = NULL;
+    char input[1000];
     char fileName[100];
-    char myText[100];
-    int i = 0;
-    int j = 0;
-    FILE *fileSave;
-    FILE *fileRead;
 
+    printf("All commands:\n1-enter new text.\n2-start the new line.\n3-saving the information to your file."
+           "\n4-loading the information from your file.\n5-print the current text to console.\n6-insert the text by line and symbol index."
+           "\n7-search by word.");
     while (1)
     {
         printf("\nChoose the command:\n");
@@ -21,46 +121,28 @@ int main()
         {
             case 1:
                 getchar(); // delete the new line character left in the buffer after typing
-                printf("Enter text to append: ");
-                if (text[0] != 0)
-                {
-                    fgets(text2, sizeof(text2), stdin);
-                    while (text[j] != 0)
-                        j++;
-                    if (text[j - 1] == '\n')
-                    {
-                        text[j - 1] = '\0';
-                    }
-                    strcat(text, text2);
-                }
-                else
-                    fgets(text, sizeof(text), stdin);
-                printf("%s", text);
-                j = 0;
+                printf("Enter text to append (please, no more than 1000 characters): ");
+                fgets(input, sizeof(input), stdin);
+                addCharElement(&myList, input);
+                // printf("%s", input);
+                printLinkedList(&myList);
                 break;
             case 2:
-                while (text[i] != 0)
-                {
-                    i++;
-                }
-                text[i] = '\n';
-                //printf("%s", text);
+                addNewLine(&myList);
                 printf("New line is started.");
-                i = 0;
                 break;
             case 3:
                 printf("Enter the file name for saving: ");
                 scanf("%s", fileName);
-                printf("\nText has been saved successfully.");
+                saveTextToFile(&myList, fileName);
+                printf("Text has been saved successfully.");
                 break;
             case 4:
                 printf("Enter the file name for loading: ");
                 scanf("%s", fileName);
                 if (fileName[0] != 0)
                 {
-                    fileSave = fopen(fileName, "a");
-                    fprintf(fileSave, text);
-                    fclose(fileSave);
+                    loadTextFromFile(&myList, fileName);
                     printf("Text has been loaded successfully.");
                     break;
                 }
@@ -70,25 +152,7 @@ int main()
                 }
                 break;
             case 5:
-                if (fileName[0] != 0)
-                {
-                    fileRead = fopen(fileName, "r");
-                    if (fileRead == NULL)
-                    {
-                        printf("Error opening file.");
-                    }
-                    else
-                    {
-                        while(fgets(myText, 100, fileRead)) {
-                            printf("%s", myText);
-                        }
-                        fclose(fileRead);
-                    }
-                }
-                else
-                {
-                    printf("Choose command 3.");
-                }
+                printLinkedList(&myList);
                 break;
             case 6:
                 printf("Choose line and index: ");
@@ -103,5 +167,4 @@ int main()
                 break;
         }
     }
-    return 0;
 }
