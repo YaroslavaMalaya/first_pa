@@ -16,16 +16,18 @@ void addCharElement(struct LinkedList* list, const char elements[100]){
     int i = 0;
     while (elements[i] != '\n')
     {
+        // if linked list is empty, create the first node (head, current) and assign the value
         if (list->head == NULL)
         {
-            list->head = (struct Node*)malloc(sizeof(struct Node));
+            list->head = (struct Node*)malloc(sizeof(struct Node)); // allocating memory for a new Node in the linked list
             list->head->value = elements[i];
             list->head->next = NULL;
             list->current = list->head;
         }
         else
         {
-            list->current->next = (struct Node*)malloc(sizeof(struct Node));
+            // if linked list isn`t empty, crete next new node after current and assign the value
+            list->current->next = (struct Node*)malloc(sizeof(struct Node)); // allocating memory for a new Node in the linked list
             list->current->next->value = elements[i];
             list->current->next->next = NULL;
             list->current = list->current->next;
@@ -39,6 +41,7 @@ void addCharElement(struct LinkedList* list, const char elements[100]){
 }
 
 void addNewLine(struct LinkedList* list){
+    // if linked list is empty, create the first node (head, current) and assign the value \n (new line)
     if (list->head == NULL)
     {
         list->head = (struct Node*)malloc(sizeof(struct Node));
@@ -48,6 +51,7 @@ void addNewLine(struct LinkedList* list){
     }
     else
     {
+        // if linked list isn`t empty, create next new node and assign the value \n (new line)
         list->current->next = (struct Node*)malloc(sizeof(struct Node));
         list->current->next->value = '\n';
         list->current->next->next = NULL;
@@ -58,10 +62,10 @@ void addNewLine(struct LinkedList* list){
 void saveTextToFile(struct LinkedList* list, char* fileName)
 {
     FILE* file = fopen(fileName, "a");
-    struct Node* current = list->head;
+    struct Node* current = list->head; // move to the beginning linked list
     while (current != NULL)
     {
-        fputc(current->value, file);
+        fputc(current->value, file); // append each value to the file while current node has it
         current = current->next;
     }
     fclose(file);
@@ -69,12 +73,12 @@ void saveTextToFile(struct LinkedList* list, char* fileName)
 
 void loadTextFromFile(struct LinkedList* list, char* fileName)
 {
-    // clear linked list (myList)
+    // clear linked list (myList) for rewriting
     struct Node* current = list->head;
     while (current != NULL)
     {
         struct Node* next = current->next;
-        free(current);
+        free(current); // freeing memory that was previously allocated using the malloc function
         current = next;
     }
     list->head = NULL;
@@ -84,10 +88,12 @@ void loadTextFromFile(struct LinkedList* list, char* fileName)
     char block[100];
     int i = 0;
 
+    // while file contains data (100 characters in each step of while)
     while (fgets(block, sizeof(block), file) != NULL)
     {
         while (block[i] != NULL)
         {
+            // the same as addCharElement();
             if (list->head == NULL)
             {
                 list->head = (struct Node*)malloc(sizeof(struct Node));
@@ -110,7 +116,7 @@ void loadTextFromFile(struct LinkedList* list, char* fileName)
 }
 
 void insertText(struct LinkedList* list, int lineIndex, int symbolIndex, char* text){
-    if (lineIndex == 0 && symbolIndex == 0)
+    if (lineIndex == 0 && symbolIndex == 0) // if user wants to write something at the beginning
     {
         list->current = list->head;
         addCharElement(list, text);
@@ -122,13 +128,14 @@ void insertText(struct LinkedList* list, int lineIndex, int symbolIndex, char* t
         int currentLine = 0;
         int currentSymbol = 0;
 
+        // find line that has the same index
         while (currentLine < lineIndex)
         {
             previous = list->current;
-            list->current = previous->next;
+            list->current = previous->next; // the same as list->current = list->current->next;
             if (list->current == NULL)
             {
-                printf("\nIncorrect line index.");
+                printf("\nIncorrect line index."); // so the line does not exist
                 break;
             }
             if (list->current->value == '\n')
@@ -137,31 +144,32 @@ void insertText(struct LinkedList* list, int lineIndex, int symbolIndex, char* t
             }
         }
 
+        // find symbol in the line that has the same index
         while (currentSymbol < symbolIndex)
         {
             previous = list->current;
             list->current = previous->next;
             if (list->current == NULL)
             {
-                printf("\nIncorrect symbol index.");
+                printf("\nIncorrect symbol index."); // so the symbol index does not exist
                 break;
             }
             currentSymbol++;
         }
 
         struct Node* temp = NULL;
-        temp = list->current->next;
+        temp = list->current->next; // remember the node that must then be added to the newly added node
         int i = 0;
 
         while (text[i] != '\n')
         {
-            list->current->next = (struct Node*)malloc(sizeof(struct Node));
+            list->current->next = (struct Node*)malloc(sizeof(struct Node)); // allocating memory for a new Node in the linked list
             list->current->next->value = text[i];
             list->current->next->next = NULL;
             list->current = list->current->next;
             i++;
         }
-        list->current->next = temp;
+        list->current->next = temp; // add the node with other connections that should be here
     }
 }
 
@@ -176,7 +184,7 @@ void searchInText(struct LinkedList* list, const char* text){
     {
         if (current->value == '\n')
         {
-            lineIndex++;
+            lineIndex++; // count line index
             symbolIndex = 0;
             textIndex = 0;
             checkLength = 0;
@@ -184,11 +192,12 @@ void searchInText(struct LinkedList* list, const char* text){
         else if (current->value == text[textIndex])
         {
             textIndex++;
-            checkLength++;
+            checkLength++; // check how long this text
 
             if (text[textIndex] == '\n')
             {
                 printf("line %d  symbol %d; ", lineIndex, symbolIndex - checkLength);
+                // clear everything that was found and continue searching
                 textIndex = 0;
                 checkLength = 0;
             }
@@ -198,8 +207,8 @@ void searchInText(struct LinkedList* list, const char* text){
             textIndex = 0;
             checkLength = 0;
         }
-        current = current->next;
-        symbolIndex++;
+        current = current->next; // move to the next node
+        symbolIndex++; // count symbol index
     }
 }
 
@@ -226,8 +235,9 @@ int main()
 
     while (1)
     {
-        system("clear");
+        system("clear"); // clear the console
 
+        // describe all commands
         printf("\n\nAll commands:\n1-enter new text.\n2-start the new line.\n3-saving the information to your file."
                "\n4-loading the information from your file.\n5-print the current text to console.\n6-insert the text "
                "by line and symbol index.\n7-search by word.");
@@ -274,13 +284,13 @@ int main()
             case 6:
                 printf("Choose line and index: ");
                 scanf("%d %d", &lineIndex, &symbolIndex);
-                getchar();
+                getchar(); // delete the new line character left in the buffer after typing
                 printf("Enter text to insert (please, no more than 100 characters): ");
                 fgets(input, sizeof(input), stdin);
                 insertText(&myList, lineIndex, symbolIndex, input);
                 break;
             case 7:
-                getchar();
+                getchar(); // delete the new line character left in the buffer after typing
                 printf("Enter text to search: ");
                 fgets(searchText, sizeof(searchText), stdin);
                 printf("Text is present in this position: ");
