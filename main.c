@@ -226,9 +226,9 @@ int main()
 
     while (1)
     {
-        system ("clear");
+        system("clear");
 
-        printf("\nAll commands:\n1-enter new text.\n2-start the new line.\n3-saving the information to your file."
+        printf("\n\nAll commands:\n1-enter new text.\n2-start the new line.\n3-saving the information to your file."
                "\n4-loading the information from your file.\n5-print the current text to console.\n6-insert the text "
                "by line and symbol index.\n7-search by word.");
 
