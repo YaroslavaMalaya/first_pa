@@ -176,7 +176,7 @@ void insertText(struct LinkedList* list, int lineIndex, int symbolIndex, char* t
 void searchInText(struct LinkedList* list, const char* text){
     struct Node* current = list->head;
     int lineIndex = 0;
-    int symbolIndex = 0;
+    int symbolIndex = 1;
     int textIndex = 0;
     int checkLength = 0;
 
@@ -201,6 +201,11 @@ void searchInText(struct LinkedList* list, const char* text){
                 textIndex = 0;
                 checkLength = 0;
             }
+        }
+        else if (current->value == text[0])
+        {
+            textIndex = 1;
+            checkLength = 1;
         }
         else
         {
